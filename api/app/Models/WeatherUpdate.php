@@ -29,6 +29,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WeatherUpdate extends Model
 {
+    /** @var array */
+    protected $casts = [
+        'time' => 'datetime'
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

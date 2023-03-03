@@ -188,55 +188,6 @@ class Weather implements \JsonSerializable
         return $this;
     }
 
-    /**
-     * @param string $targetUnit
-     *
-     * @return float
-     */
-    public function convertTemperatureUnit(string $targetUnit): float
-    {
-        $conversion = [
-            self::TEMP_UNIT_CELSIUS    => [
-                self::TEMP_UNIT_CELSIUS    => function ($val) {
-                    return $val;
-                },
-                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
-                    return ($val * 9 / 5) + 32;
-                },
-                self::TEMP_UNIT_KELVIN     => function ($val) {
-                    return $val + 273.15;
-                }
-            ],
-            self::TEMP_UNIT_FAHRENHEIT => [
-                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
-                    return $val;
-                },
-                self::TEMP_UNIT_CELSIUS    => function ($val) {
-                    return ($val - 32) * 5 / 9;
-                },
-                self::TEMP_UNIT_KELVIN     => function ($val) {
-                    return (($val - 32) * 5 / 9) + 273.15;
-                }
-            ],
-            self::TEMP_UNIT_KELVIN     => [
-                self::TEMP_UNIT_KELVIN     => function ($val) {
-                    return $val;
-                },
-                self::TEMP_UNIT_CELSIUS    => function ($val) {
-                    return $val - 273.15;
-                },
-                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
-                    return (($val - 273.15) * 9 / 5) + 32;
-                }
-            ]
-        ];
-
-        $fromUnit   = strtoupper($this->temperatureUnit);
-        $targetUnit = strtoupper($targetUnit);
-
-        return $conversion[$fromUnit][$targetUnit]($this->temperature);
-    }
-
     /** @return float */
     public function getWindSpeed(): float
     {
@@ -247,55 +198,6 @@ class Weather implements \JsonSerializable
     public function getWindSpeedUnit(): string
     {
         return $this->windSpeedUnit;
-    }
-
-    /**
-     * @param string $targetUnit
-     *
-     * @return float
-     */
-    public function convertWindSpeedUnit(string $targetUnit): float
-    {
-        $conversion = [
-            self::WIND_SPEED_UNIT_KMPH => [
-                self::WIND_SPEED_UNIT_KMPH => function ($val) {
-                    return $val;
-                },
-                self::WIND_SPEED_UNIT_MPH  => function ($val) {
-                    return $val / 1.609344;
-                },
-                self::WIND_SPEED_UNIT_MPS  => function ($val) {
-                    return $val / 3.6;
-                }
-            ],
-            self::WIND_SPEED_UNIT_MPH  => [
-                self::WIND_SPEED_UNIT_MPH  => function ($val) {
-                    return $val;
-                },
-                self::WIND_SPEED_UNIT_KMPH => function ($val) {
-                    return $val * 1.609344;
-                },
-                self::WIND_SPEED_UNIT_MPS  => function ($val) {
-                    return $val / 2.237;
-                }
-            ],
-            self::WIND_SPEED_UNIT_MPS  => [
-                self::WIND_SPEED_UNIT_MPS  => function ($val) {
-                    return $val;
-                },
-                self::WIND_SPEED_UNIT_KMPH => function ($val) {
-                    return $val * 3.6;
-                },
-                self::WIND_SPEED_UNIT_MPH  => function ($val) {
-                    return $val * 2.237;
-                }
-            ]
-        ];
-
-        $fromUnit   = strtoupper($this->windSpeedUnit);
-        $targetUnit = strtoupper($targetUnit);
-
-        return $conversion[$fromUnit][$targetUnit]($this->windSpeed);
     }
 
     /**
@@ -346,5 +248,107 @@ class Weather implements \JsonSerializable
             'wind_speed_unit'  => $this->windSpeedUnit,
             'wind_direction'   => $this->windDirection,
         ];
+    }
+
+    /**
+     * @param float $temperature
+     * @param string $fromUnit
+     * @param string $targetUnit
+     *
+     * @return float
+     */
+    public static function convertTemperatureUnit(float $temperature, string $fromUnit, string $targetUnit): float
+    {
+        $conversion = [
+            self::TEMP_UNIT_CELSIUS    => [
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return ($val * 9 / 5) + 32;
+                },
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return $val + 273.15;
+                }
+            ],
+            self::TEMP_UNIT_FAHRENHEIT => [
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return ($val - 32) * 5 / 9;
+                },
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return (($val - 32) * 5 / 9) + 273.15;
+                }
+            ],
+            self::TEMP_UNIT_KELVIN     => [
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return $val - 273.15;
+                },
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return (($val - 273.15) * 9 / 5) + 32;
+                }
+            ]
+        ];
+
+        $fromUnit   = strtoupper($fromUnit);
+        $targetUnit = strtoupper($targetUnit);
+
+        return $conversion[$fromUnit][$targetUnit]($temperature);
+    }
+
+    /**
+     * @param float $windSpeed
+     * @param string $fromUnit
+     * @param string $targetUnit
+     *
+     * @return float
+     */
+    public static function convertWindSpeedUnit(float $windSpeed, string $fromUnit, string $targetUnit): float
+    {
+        $conversion = [
+            self::WIND_SPEED_UNIT_KMPH => [
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val / 1.609344;
+                },
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val / 3.6;
+                }
+            ],
+            self::WIND_SPEED_UNIT_MPH  => [
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val * 1.609344;
+                },
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val / 2.237;
+                }
+            ],
+            self::WIND_SPEED_UNIT_MPS  => [
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val * 3.6;
+                },
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val * 2.237;
+                }
+            ]
+        ];
+
+        $fromUnit   = strtoupper($fromUnit);
+        $targetUnit = strtoupper($targetUnit);
+
+        return $conversion[$fromUnit][$targetUnit]($windSpeed);
     }
 }

@@ -1,26 +1,33 @@
 <script>
 import { fetchWithTimeout, post } from '../helpers/fetch';
-import { MapIcon } from "@heroicons/vue/24/outline"
-import { CloudIcon } from "@heroicons/vue/24/outline"
-import { ClockIcon } from "@heroicons/vue/24/outline"
+import { MapPinIcon, CloudIcon, ClockIcon, SunIcon, FlagIcon } from "@heroicons/vue/24/outline"
+import UnitPreference from '../components/UnitPreference.vue'
 
 export default {
-  components: { MapIcon, CloudIcon, ClockIcon },
+  components: { MapPinIcon, CloudIcon, ClockIcon, SunIcon, FlagIcon, UnitPreference },
   data: () => ({
     users: [],
-    isUpdatingWeather: {}
+    isUpdatingWeather: {},
+    temperatureUnit: 'CELSIUS',
+    windSpeedUnit: 'KMH'
   }),
   created() {
     this.fetchUsers()
   },
   methods: {
+    async updatePreference(preference) {
+      this.temperatureUnit = preference.temperatureUnit
+      this.windSpeedUnit = preference.windSpeedUnit
+
+      await this.fetchUsers()
+    },
     async fetchUsers() {
-      const url = import.meta.env.VITE_API_URL + '/v1/users'
+      const url = import.meta.env.VITE_API_URL + '/v1/users?temperature-unit=' + this.temperatureUnit + '&wind-speed-unit=' + this.windSpeedUnit
 
       this.users = await (await fetchWithTimeout(url, { timeout: 500 })).json()
     },
     async fetchUser(userId) {
-      const url = import.meta.env.VITE_API_URL + '/v1/users/' + userId
+      const url = import.meta.env.VITE_API_URL + '/v1/users/' + userId + '?temperature-unit=' + this.temperatureUnit + '&wind-speed-unit=' + this.windSpeedUnit
 
       const user = await (await fetchWithTimeout(url, { timeout: 500 })).json()
 
@@ -47,7 +54,11 @@ export default {
   <div class="bg-white">
     <div class="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
       <h2 class="text-2xl font-bold tracking-tight text-gray-900">Users</h2>
-      <button @click="updateAll" class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
+      <div class="my-2">
+        <UnitPreference @update="updatePreference" />
+      </div>
+      <button @click="updateAll"
+        class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
         Update All Users
       </button>
       <div class="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
@@ -60,7 +71,7 @@ export default {
             </h3>
             <div class="space-y-1">
               <div class="flex flex-row space-x-2 text-sm items-center">
-                <MapIcon class="h-6 w-6 text-blue-500" />
+                <MapPinIcon class="h-6 w-6 text-blue-500" />
                 <div>{{ user.latitude }}, {{ user.longitude }}</div>
               </div>
               <div class="flex flex-row space-x-2 text-sm items-center">
@@ -81,8 +92,27 @@ export default {
                   <div>-</div>
                 </template>
               </div>
+              <div class="flex flex-row space-x-2 text-sm items-center">
+                <SunIcon class="h-6 w-6 text-blue-500" />
+                <template v-if="user.lastWeatherUpdate">
+                  <div>{{ user.lastWeatherUpdate.temperature }} {{ temperatureUnit }}</div>
+                </template>
+                <template v-else>
+                  <div>-</div>
+                </template>
+              </div>
+              <div class="flex flex-row space-x-2 text-sm items-center">
+                <FlagIcon class="h-6 w-6 text-blue-500" />
+                <template v-if="user.lastWeatherUpdate">
+                  <div>{{ user.lastWeatherUpdate.wind_speed }} {{ windSpeedUnit }}</div>
+                </template>
+                <template v-else>
+                  <div>-</div>
+                </template>
+              </div>
               <div v-if="isUpdatingWeather[user.id]">Updating...</div>
-              <button v-else @click="() => refreshWeather(user.id)" class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
+              <button v-else @click="() => refreshWeather(user.id)"
+                class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
                 Update Now
               </button>
             </div>

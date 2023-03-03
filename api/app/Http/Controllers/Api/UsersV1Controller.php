@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\WeatherUpdate;
 use App\Services\Weather\WeatherProvider;
 use Carbon\Carbon;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 /**

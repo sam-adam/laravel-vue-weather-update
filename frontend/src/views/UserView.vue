@@ -1,28 +1,34 @@
 <script>
 import { fetchWithTimeout, post } from '../helpers/fetch';
-import { MapIcon } from "@heroicons/vue/24/outline"
-import { CloudIcon } from "@heroicons/vue/24/outline"
-import { ClockIcon } from "@heroicons/vue/24/outline"
+import UnitPreference from '../components/UnitPreference.vue'
 
 export default {
-  components: { MapIcon, CloudIcon, ClockIcon },
+  components: { UnitPreference },
   data: () => ({
     user: null,
-    isUpdatingWeather: false
+    isUpdatingWeather: false,
+    temperatureUnit: 'CELSIUS',
+    windSpeedUnit: 'KMH'
   }),
   created() {
     this.fetchUser()
   },
   methods: {
+    async updatePreference(preference) {
+      this.temperatureUnit = preference.temperatureUnit
+      this.windSpeedUnit = preference.windSpeedUnit
+
+      await this.fetchUser()
+    },
     async fetchUser() {
-      const url = import.meta.env.VITE_API_URL + '/v1/users/' + this.$route.params['id']
+      const url = import.meta.env.VITE_API_URL + '/v1/users/' + this.$route.params['id'] + '?temperature-unit=' + this.temperatureUnit + '&wind-speed-unit=' + this.windSpeedUnit
 
       this.user = await (await fetchWithTimeout(url, { timeout: 500 })).json()
     },
     async refreshWeather() {
       this.isUpdatingWeather = true
 
-      const url = import.meta.env.VITE_API_URL + '/v1/users/' + this.$route.params['id'] + '/refresh-weather'
+      const url = import.meta.env.VITE_API_URL + '/v1/users/' + this.$route.params['id'] + '/refresh-weather?temperature-unit=' + this.temperatureUnit + '&wind-speed-unit=' + this.windSpeedUnit
 
       await (await post(url)).json()
       await this.fetchUser()
@@ -37,6 +43,9 @@ export default {
   <div v-if="user" class="bg-white">
     <div class="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
       <h2 class="text-2xl font-bold tracking-tight text-gray-900">{{ user.name }}</h2>
+      <div class="my-2">
+        <UnitPreference @update="updatePreference" />
+      </div>
       <div class="mt-6">
         <div class="shadow p-4 w-full space-y-3">
           <div>
@@ -63,7 +72,8 @@ export default {
             </div>
             <div>
               <div v-if="isUpdatingWeather">Updating...</div>
-              <button v-else @click="refreshWeather" class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
+              <button v-else @click="refreshWeather"
+                class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
                 Update Now
               </button>
             </div>

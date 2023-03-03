@@ -43,7 +43,7 @@ class WeatherTest extends TestCase
             $weather = new Weather();
             $weather->setTemperature($value, $from);
 
-            $this->assertEquals($expected, round($weather->convertTemperatureUnit($target), $precision));
+            $this->assertEquals($expected, round(Weather::convertTemperatureUnit($value, $from, $target), $precision));
         }
     }
 
@@ -59,7 +59,7 @@ class WeatherTest extends TestCase
             $weather = new Weather();
             $weather->setWindSpeed($value, $from);
 
-            $this->assertEquals($expected, round($weather->convertWindSpeedUnit($target), $precision));
+            $this->assertEquals($expected, round(Weather::convertWindSpeedUnit($value, $from, $target), $precision));
         }
     }
 }
