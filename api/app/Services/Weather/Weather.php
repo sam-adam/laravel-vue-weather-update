@@ -20,15 +20,19 @@ class Weather implements \JsonSerializable
     const CONDITION_THUNDERSTORM = 'THUNDERSTORM';
     const CONDITION_SNOW         = 'SNOW';
     const CONDITION_SNOW_SHOWER  = 'SNOW_SHOWER';
+    const CONDITION_ATMOSPHERE   = 'ATMOSPHERE';
     const CONDITION_OTHER        = 'OTHER';
 
     const TEMP_UNIT_CELSIUS    = 'CELSIUS';
     const TEMP_UNIT_FAHRENHEIT = 'FAHRENHEIT';
+    const TEMP_UNIT_KELVIN     = 'KELVIN';
 
     const WIND_SPEED_UNIT_KMPH = 'KMH';
     const WIND_SPEED_UNIT_MPH  = 'MPH';
     const WIND_SPEED_UNIT_MPS  = 'MS';
 
+    /** @var string */
+    private $provider;
     /** @var Carbon */
     private $time;
     /** @var float */
@@ -49,6 +53,24 @@ class Weather implements \JsonSerializable
     private $windSpeedUnit;
     /** @var float */
     private $windDirection;
+
+    /** @return string */
+    public function getProvider(): string
+    {
+        return $this->provider;
+    }
+
+    /**
+     * @param string $provider
+     *
+     * @return Weather
+     */
+    public function setProvider(string $provider): Weather
+    {
+        $this->provider = $provider;
+
+        return $this;
+    }
 
     /** @return Carbon */
     public function getTime(): Carbon
@@ -166,6 +188,55 @@ class Weather implements \JsonSerializable
         return $this;
     }
 
+    /**
+     * @param string $targetUnit
+     *
+     * @return float
+     */
+    public function convertTemperatureUnit(string $targetUnit): float
+    {
+        $conversion = [
+            self::TEMP_UNIT_CELSIUS    => [
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return ($val * 9 / 5) + 32;
+                },
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return $val + 273.15;
+                }
+            ],
+            self::TEMP_UNIT_FAHRENHEIT => [
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return ($val - 32) * 5 / 9;
+                },
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return (($val - 32) * 5 / 9) + 273.15;
+                }
+            ],
+            self::TEMP_UNIT_KELVIN     => [
+                self::TEMP_UNIT_KELVIN     => function ($val) {
+                    return $val;
+                },
+                self::TEMP_UNIT_CELSIUS    => function ($val) {
+                    return $val - 273.15;
+                },
+                self::TEMP_UNIT_FAHRENHEIT => function ($val) {
+                    return (($val - 273.15) * 9 / 5) + 32;
+                }
+            ]
+        ];
+
+        $fromUnit   = strtoupper($this->temperatureUnit);
+        $targetUnit = strtoupper($targetUnit);
+
+        return $conversion[$fromUnit][$targetUnit]($this->temperature);
+    }
+
     /** @return float */
     public function getWindSpeed(): float
     {
@@ -176,6 +247,55 @@ class Weather implements \JsonSerializable
     public function getWindSpeedUnit(): string
     {
         return $this->windSpeedUnit;
+    }
+
+    /**
+     * @param string $targetUnit
+     *
+     * @return float
+     */
+    public function convertWindSpeedUnit(string $targetUnit): float
+    {
+        $conversion = [
+            self::WIND_SPEED_UNIT_KMPH => [
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val / 1.609344;
+                },
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val / 3.6;
+                }
+            ],
+            self::WIND_SPEED_UNIT_MPH  => [
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val * 1.609344;
+                },
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val / 2.237;
+                }
+            ],
+            self::WIND_SPEED_UNIT_MPS  => [
+                self::WIND_SPEED_UNIT_MPS  => function ($val) {
+                    return $val;
+                },
+                self::WIND_SPEED_UNIT_KMPH => function ($val) {
+                    return $val * 3.6;
+                },
+                self::WIND_SPEED_UNIT_MPH  => function ($val) {
+                    return $val * 2.237;
+                }
+            ]
+        ];
+
+        $fromUnit   = strtoupper($this->windSpeedUnit);
+        $targetUnit = strtoupper($targetUnit);
+
+        return $conversion[$fromUnit][$targetUnit]($this->windSpeed);
     }
 
     /**
@@ -211,9 +331,10 @@ class Weather implements \JsonSerializable
     }
 
     /** @inheritDoc */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return [
+            'provider'         => $this->provider,
             'time'             => $this->time->unix(),
             'latitude'         => $this->latitude,
             'longitude'        => $this->longitude,

@@ -10,6 +10,13 @@ namespace App\Services\Weather;
 interface WeatherProvider
 {
     /**
+     * Get the provider identifier name
+     *
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
      * Get weather based on a single coordinate
      *
      * @param float $latitude

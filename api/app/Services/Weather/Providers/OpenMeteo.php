@@ -62,6 +62,12 @@ class OpenMeteo implements WeatherProvider
     }
 
     /** {@inheritDoc} */
+    public function getName(): string
+    {
+        return 'open-meteo';
+    }
+
+    /** {@inheritDoc} */
     public function getWeather(float $latitude, float $longitude): Weather
     {
         $tempUnit      = Weather::TEMP_UNIT_CELSIUS;
@@ -85,6 +91,7 @@ class OpenMeteo implements WeatherProvider
         $weatherLabel = self::$weatherCodes[$weatherCode];
 
         return (new Weather())
+            ->setProvider('openmeteo')
             ->setLatitude($response['latitude'])
             ->setLongitude($response['longitude'])
             ->setLabel($weatherLabel[0])
