@@ -63,7 +63,9 @@ export default {
             </div>
             <div>
               <div v-if="isUpdatingWeather">Updating...</div>
-              <button v-else @click="refreshWeather" class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">Update Now</button>
+              <button v-else @click="refreshWeather" class="inline-flex justify-center rounded-lg text-sm font-semibold py-2 px-3 bg-slate-900 text-white hover:bg-slate-700">
+                Update Now
+              </button>
             </div>
           </div>
           <div>
@@ -116,6 +118,39 @@ export default {
               <template v-else>
                 -
               </template>
+            </div>
+          </div>
+          <div>
+            <div class="font-bold mb-2">
+              Weather History
+            </div>
+            <div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Provider</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Temperature</th>
+                    <th>Wind Speed</th>
+                    <th>Wind Direction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="weatherUpdate in user.weatherUpdates" :key="weatherUpdate.id">
+                    <tr>
+                      <td>{{ weatherUpdate.time }}</td>
+                      <td>{{ weatherUpdate.provider }}</td>
+                      <td>{{ weatherUpdate.latitude }}</td>
+                      <td>{{ weatherUpdate.longitude }}</td>
+                      <td>{{ weatherUpdate.temperature }} {{ weatherUpdate.temperature_unit }}</td>
+                      <td>{{ weatherUpdate.wind_speed }} {{ weatherUpdate.wind_speed_unit }}</td>
+                      <td>{{ weatherUpdate.wind_direction }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
